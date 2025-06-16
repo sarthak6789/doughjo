@@ -138,7 +138,6 @@ export default function HomeScreen() {
           <View style={styles.lessonCardsContainer}>
             {/* Budgeting Dojo */}
             <LessonCard
-              id="budget-intro"
               title="Budgeting Basics"
               description="Learn to create and stick to a budget"
               icon={<Wallet color={Colors.accent.teal} size={24} />}
@@ -151,7 +150,6 @@ export default function HomeScreen() {
             
             {/* Saving Dojo */}
             <LessonCard
-              id="income-expenses"
               title="Saving Sensei"
               description="Discover strategies to save money effectively"
               icon={<PiggyBank color={Colors.accent.teal} size={24} />}
@@ -164,7 +162,6 @@ export default function HomeScreen() {
             
             {/* Credit Dojo */}
             <LessonCard
-              id="fifty-thirty-twenty"
               title="Credit Card Master"
               description="Use credit responsibly and build your score"
               icon={<CreditCard color={Colors.accent.teal} size={24} />}
@@ -177,7 +174,6 @@ export default function HomeScreen() {
             
             {/* Investing Dojo - Locked */}
             <LessonCard
-              id="tracking-expenses"
               title="Investing 101"
               description="Start your journey into investing"
               icon={<TrendingUp color={Colors.text.tertiary} size={24} />}
@@ -190,7 +186,6 @@ export default function HomeScreen() {
             
             {/* Taxes Dojo - Locked */}
             <LessonCard
-              id="budget-challenge"
               title="Tax Tactics"
               description="Understand taxes and maximize returns"
               icon={<BadgeDollarSign color={Colors.text.tertiary} size={24} />}
@@ -203,7 +198,6 @@ export default function HomeScreen() {
             
             {/* Advanced Investing - Locked */}
             <LessonCard
-              id="advanced-investing"
               title="Advanced Investing"
               description="Level up your investment strategies"
               icon={<LineChart color={Colors.text.tertiary} size={24} />}

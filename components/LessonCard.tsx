@@ -6,7 +6,6 @@ import { Lock, BookmarkPlus, BookmarkCheck } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 type LessonCardProps = {
-  id: string;
   title: string;
   description: string;
   icon: ReactNode;
@@ -20,7 +19,6 @@ type LessonCardProps = {
 };
 
 export const LessonCard = ({ 
-  id,
   title, 
   description, 
   icon, 
@@ -54,7 +52,8 @@ export const LessonCard = ({
 
   const handlePress = () => {
     if (!locked) {
-      router.push(`/lesson/${id}`);
+      // Navigate to lesson content - you can customize this route
+      router.push(`/(tabs)/learn`);
     }
   };
 
