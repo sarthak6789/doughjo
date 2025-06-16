@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import Colors from '@/constants/Colors';
 import { SPACING, FONT_SIZE, BORDER_RADIUS } from '@/constants/Theme';
-import { Brain, Check, X } from 'lucide-react-native';
-
-const DOUGH_COIN_IMAGE = 'https://images.pexels.com/photos/730547/pexels-photo-730547.jpeg';
+import { Brain, Check, X, Trophy } from 'lucide-react-native';
 
 interface Quiz {
   id: string;
@@ -27,6 +25,25 @@ export function QuizCard({ quiz, completed, onComplete }: QuizCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isAnswered, setIsAnswered] = useState(completed);
+  const scaleValue = new Animated.Value(1);
+
+  const handlePressIn = () => {
+    Animated.spring(scaleValue, {
+      toValue: 0.98,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleValue, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 10,
+    }).start();
+  };
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (isAnswered) return;
@@ -42,7 +59,7 @@ export function QuizCard({ quiz, completed, onComplete }: QuizCardProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'easy':
-        return Colors.accent.teal;
+        return Colors.accent.green;
       case 'medium':
         return Colors.accent.yellow;
       case 'hard':
@@ -53,95 +70,140 @@ export function QuizCard({ quiz, completed, onComplete }: QuizCardProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.categoryContainer}>
-          <Brain color={Colors.accent.magenta} size={16} />
-          <Text style={styles.category}>{quiz.category}</Text>
-        </View>
-        <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(quiz.difficulty) + '20' }]}>
-          <Text style={[styles.difficulty, { color: getDifficultyColor(quiz.difficulty) }]}>
-            {quiz.difficulty}
-          </Text>
-        </View>
-      </View>
-      
-      <Text style={styles.title}>{quiz.title}</Text>
-      <Text style={styles.question}>{quiz.question}</Text>
-      
-      <View style={styles.optionsContainer}>
-        {quiz.options.map((option, index) => {
-          let optionStyle = styles.option;
-          let textStyle = styles.optionText;
-          
-          if (showResult && index === quiz.correctAnswer) {
-            optionStyle = [styles.option, styles.correctOption];
-            textStyle = [styles.optionText, styles.correctOptionText];
-          } else if (showResult && selectedAnswer === index && index !== quiz.correctAnswer) {
-            optionStyle = [styles.option, styles.incorrectOption];
-            textStyle = [styles.optionText, styles.incorrectOptionText];
-          } else if (selectedAnswer === index && !showResult) {
-            optionStyle = [styles.option, styles.selectedOption];
-          }
-          
-          return (
-            <TouchableOpacity
-              key={index}
-              style={optionStyle}
-              onPress={() => handleAnswerSelect(index)}
-              disabled={isAnswered}
-            >
-              <Text style={textStyle}>{option}</Text>
-              {showResult && index === quiz.correctAnswer && (
-                <Check color={Colors.background.primary} size={16} />
-              )}
-              {showResult && selectedAnswer === index && index !== quiz.correctAnswer && (
-                <X color={Colors.background.primary} size={16} />
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-      
-      <View style={styles.footer}>
-        <View style={styles.rewardContainer}>
-          <Image 
-            source={require('@/assets/images/coin.png')} 
-            style={styles.coinIcon} 
-            resizeMode="contain"
-          />
-          <Text style={styles.rewardText}>+{quiz.reward}</Text>
+    <Animated.View style={[styles.cardWrapper, { transform: [{ scale: scaleValue }] }]}>
+      <TouchableOpacity
+        style={[styles.container, completed && styles.completedContainer]}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={0.95}
+        disabled={isAnswered}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.categoryContainer}>
+            <Brain color={Colors.accent.magenta} size={16} />
+            <Text style={styles.category}>{quiz.category}</Text>
+          </View>
+          <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(quiz.difficulty) + '20' }]}>
+            <Text style={[styles.difficulty, { color: getDifficultyColor(quiz.difficulty) }]}>
+              {quiz.difficulty}
+            </Text>
+          </View>
         </View>
         
-        {completed && (
-          <View style={styles.completedBadge}>
-            <Check color={Colors.accent.teal} size={16} />
-            <Text style={styles.completedText}>Completed</Text>
+        {/* Content */}
+        <View style={styles.content}>
+          <Text style={styles.title}>{quiz.title}</Text>
+          <Text style={styles.question}>{quiz.question}</Text>
+        </View>
+        
+        {/* Options */}
+        <View style={styles.optionsContainer}>
+          {quiz.options.map((option, index) => {
+            let optionStyle = styles.option;
+            let textStyle = styles.optionText;
+            let iconComponent = null;
+            
+            if (showResult && index === quiz.correctAnswer) {
+              optionStyle = [styles.option, styles.correctOption];
+              textStyle = [styles.optionText, styles.correctOptionText];
+              iconComponent = <Check color={Colors.background.primary} size={16} />;
+            } else if (showResult && selectedAnswer === index && index !== quiz.correctAnswer) {
+              optionStyle = [styles.option, styles.incorrectOption];
+              textStyle = [styles.optionText, styles.incorrectOptionText];
+              iconComponent = <X color={Colors.background.primary} size={16} />;
+            }
+            
+            return (
+              <TouchableOpacity
+                key={index}
+                style={optionStyle}
+                onPress={() => handleAnswerSelect(index)}
+                disabled={isAnswered}
+              >
+                <Text style={textStyle} numberOfLines={2}>{option}</Text>
+                {iconComponent && (
+                  <View style={styles.optionIcon}>
+                    {iconComponent}
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        
+        {/* Footer */}
+        <View style={styles.footer}>
+          <View style={styles.rewardContainer}>
+            <Image 
+              source={require('@/assets/images/coin.png')} 
+              style={styles.coinIcon} 
+              resizeMode="contain"
+            />
+            <Text style={styles.rewardText}>+{quiz.reward}</Text>
+          </View>
+          
+          {completed && (
+            <View style={styles.completedBadge}>
+              <Trophy color={Colors.accent.teal} size={16} />
+              <Text style={styles.completedText}>Completed</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Success Overlay */}
+        {showResult && selectedAnswer === quiz.correctAnswer && (
+          <View style={styles.successOverlay}>
+            <View style={styles.successContent}>
+              <Check color={Colors.accent.green} size={24} />
+              <Text style={styles.successText}>Correct!</Text>
+            </View>
           </View>
         )}
-      </View>
-    </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  cardWrapper: {
+    marginRight: SPACING.lg,
+  },
   container: {
     backgroundColor: Colors.background.secondary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
-    marginRight: SPACING.md,
-    width: 280,
-    minHeight: 320,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    width: 300,
+    minHeight: 380,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
+    position: 'relative',
+  },
+  completedContainer: {
+    borderColor: Colors.accent.teal,
+    borderWidth: 2,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   categoryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: Colors.background.tertiary,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.lg,
   },
   category: {
     fontFamily: 'Inter-Medium',
@@ -150,7 +212,7 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.xs,
   },
   difficultyBadge: {
-    paddingHorizontal: SPACING.sm,
+    paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.full,
   },
@@ -158,49 +220,54 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     fontSize: FONT_SIZE.xs,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  content: {
+    marginBottom: SPACING.lg,
   },
   title: {
     fontFamily: 'Inter-Bold',
     fontSize: FONT_SIZE.lg,
     color: Colors.text.primary,
     marginBottom: SPACING.sm,
+    lineHeight: FONT_SIZE.lg * 1.3,
   },
   question: {
     fontFamily: 'Inter-Regular',
     fontSize: FONT_SIZE.md,
     color: Colors.text.secondary,
-    marginBottom: SPACING.lg,
     lineHeight: FONT_SIZE.md * 1.4,
   },
   optionsContainer: {
     flex: 1,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   option: {
     backgroundColor: Colors.background.tertiary,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  selectedOption: {
-    backgroundColor: Colors.accent.teal + '20',
     borderWidth: 1,
-    borderColor: Colors.accent.teal,
+    borderColor: 'transparent',
+    transition: 'all 0.2s ease',
   },
   correctOption: {
-    backgroundColor: Colors.accent.teal,
+    backgroundColor: Colors.accent.green,
+    borderColor: Colors.accent.green,
   },
   incorrectOption: {
     backgroundColor: Colors.accent.magenta,
+    borderColor: Colors.accent.magenta,
   },
   optionText: {
     fontFamily: 'Inter-Medium',
     fontSize: FONT_SIZE.md,
     color: Colors.text.primary,
     flex: 1,
+    lineHeight: FONT_SIZE.md * 1.3,
   },
   correctOptionText: {
     color: Colors.background.primary,
@@ -208,22 +275,30 @@ const styles = StyleSheet.create({
   incorrectOptionText: {
     color: Colors.background.primary,
   },
+  optionIcon: {
+    marginLeft: SPACING.sm,
+  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: Colors.card.border,
+    paddingTop: SPACING.md,
   },
   rewardContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 214, 0, 0.2)',
+    backgroundColor: 'rgba(255, 214, 0, 0.15)',
     borderRadius: BORDER_RADIUS.full,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
+    borderWidth: 1,
+    borderColor: Colors.accent.yellow + '30',
   },
   coinIcon: {
-    width: 16,
-    height: 16,
+    width: 18,
+    height: 18,
     marginRight: SPACING.xs,
   },
   rewardText: {
@@ -238,11 +313,45 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.full,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
+    borderWidth: 1,
+    borderColor: Colors.accent.teal + '30',
   },
   completedText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'Inter-Bold',
     fontSize: FONT_SIZE.sm,
     color: Colors.accent.teal,
     marginLeft: SPACING.xs,
+  },
+  successOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: BORDER_RADIUS.xl,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successContent: {
+    alignItems: 'center',
+    backgroundColor: Colors.background.secondary,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  successText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: FONT_SIZE.lg,
+    color: Colors.accent.green,
+    marginTop: SPACING.sm,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Alert, Animated } from 'react-native';
 import Colors from '@/constants/Colors';
 import { SPACING, FONT_SIZE, BORDER_RADIUS } from '@/constants/Theme';
 import { Award, Trophy, Calendar, Settings, ChevronRight, Medal, CreditCard as Edit3, Check, X, User } from 'lucide-react-native';
@@ -8,8 +8,6 @@ import { ProgressBadge } from '@/components/ProgressBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useAchievements } from '@/hooks/useAchievements';
-
-
 
 export default function ProfileScreen() {
   const { profile, updateProfile, signOut } = useAuth();
@@ -107,7 +105,11 @@ export default function ProfileScreen() {
           
           <View style={styles.profileContainer}>
             <View style={styles.profileImageContainer}>
-              <SenseiProfile style={styles.senseiImage} />
+              {profile.avatar_url ? (
+                <Image source={{ uri: profile.avatar_url }} style={styles.profileImage} />
+              ) : (
+                <SenseiProfile style={styles.senseiImage} />
+              )}
             </View>
             
             {/* Full Name */}
@@ -292,7 +294,7 @@ export default function ProfileScreen() {
           </View>
         </View>
         
-        {/* Recent Activity */}
+        {/* Account Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
           
@@ -341,29 +343,55 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: SPACING.xl,
     marginBottom: SPACING.xl,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   settingsButton: {
     position: 'absolute',
     top: 60,
     right: SPACING.lg,
     zIndex: 10,
+    backgroundColor: Colors.background.tertiary,
+    borderRadius: BORDER_RADIUS.full,
+    padding: SPACING.sm,
   },
   profileContainer: {
     alignItems: 'center',
     marginBottom: SPACING.xl,
   },
   profileImageContainer: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
     borderRadius: BORDER_RADIUS.full,
     backgroundColor: Colors.background.tertiary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 3,
+    borderColor: Colors.accent.teal + '30',
+  },
+  profileImage: {
+    width: 114,
+    height: 114,
+    borderRadius: BORDER_RADIUS.full,
   },
   senseiImage: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
   },
   nameContainer: {
     marginBottom: SPACING.xs,
@@ -372,6 +400,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
+    backgroundColor: Colors.background.tertiary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.lg,
   },
   userName: {
     fontFamily: 'Inter-Bold',
@@ -385,6 +417,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
+    backgroundColor: Colors.background.tertiary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.lg,
   },
   usernameText: {
     fontFamily: 'Inter-Medium',
@@ -395,9 +431,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
+    backgroundColor: Colors.background.tertiary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.lg,
   },
   editInput: {
-    backgroundColor: Colors.background.tertiary,
+    backgroundColor: Colors.background.primary,
     borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
@@ -405,27 +445,33 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     color: Colors.text.primary,
     minWidth: 150,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
   },
   editButton: {
     padding: SPACING.xs,
+    backgroundColor: Colors.background.primary,
+    borderRadius: BORDER_RADIUS.md,
   },
   beltContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.background.tertiary,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
   },
   beltIndicator: {
     width: 12,
     height: 12,
     borderRadius: BORDER_RADIUS.full,
-    marginRight: SPACING.xs,
+    marginRight: SPACING.sm,
   },
   beltText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: FONT_SIZE.sm,
+    fontFamily: 'Inter-Bold',
+    fontSize: FONT_SIZE.md,
     color: Colors.text.primary,
   },
   statsContainer: {
@@ -436,25 +482,35 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: Colors.background.tertiary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
     alignItems: 'center',
     marginHorizontal: SPACING.xs,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
   },
   statIcon: {
-    width: 24,
-    height: 24,
-    marginBottom: SPACING.xs,
+    width: 28,
+    height: 28,
+    marginBottom: SPACING.sm,
   },
   statValue: {
     fontFamily: 'Inter-Bold',
-    fontSize: FONT_SIZE.xl,
+    fontSize: FONT_SIZE.xxl,
     color: Colors.text.primary,
     marginBottom: SPACING.xs,
   },
   statLabel: {
-    fontFamily: 'Inter-Regular',
-    fontSize: FONT_SIZE.xs,
+    fontFamily: 'Inter-Medium',
+    fontSize: FONT_SIZE.sm,
     color: Colors.text.secondary,
     textAlign: 'center',
   },
@@ -470,13 +526,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Inter-Bold',
-    fontSize: FONT_SIZE.lg,
+    fontSize: FONT_SIZE.xl,
     color: Colors.text.primary,
     marginBottom: SPACING.md,
   },
   seeAllText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: FONT_SIZE.sm,
+    fontFamily: 'Inter-Bold',
+    fontSize: FONT_SIZE.md,
     color: Colors.accent.teal,
   },
   detailedStatsContainer: {
@@ -487,48 +543,69 @@ const styles = StyleSheet.create({
   detailedStatCard: {
     width: '48%',
     backgroundColor: Colors.background.secondary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
     marginBottom: SPACING.md,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
   },
   detailedStatValue: {
     fontFamily: 'Inter-Bold',
-    fontSize: FONT_SIZE.xxl,
+    fontSize: FONT_SIZE.xxxl,
     color: Colors.accent.teal,
-    marginBottom: SPACING.xs,
+    marginBottom: SPACING.sm,
   },
   detailedStatLabel: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Inter-Medium',
     fontSize: FONT_SIZE.sm,
     color: Colors.text.secondary,
     textAlign: 'center',
+    lineHeight: FONT_SIZE.sm * 1.3,
   },
   progressCard: {
     backgroundColor: Colors.background.secondary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   progressTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   progressTitle: {
-    fontFamily: 'Inter-Medium',
-    fontSize: FONT_SIZE.md,
+    fontFamily: 'Inter-Bold',
+    fontSize: FONT_SIZE.lg,
     color: Colors.text.primary,
     marginLeft: SPACING.sm,
   },
   beltProgressContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   beltProgressItem: {
     flex: 1,
@@ -542,8 +619,9 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontFamily: 'Inter-Regular',
-    fontSize: FONT_SIZE.sm,
+    fontSize: FONT_SIZE.md,
     color: Colors.text.secondary,
+    lineHeight: FONT_SIZE.md * 1.4,
   },
   badgesContainer: {
     flexDirection: 'row',
@@ -556,12 +634,26 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     textAlign: 'center',
     fontStyle: 'italic',
-    padding: SPACING.lg,
+    padding: SPACING.xl,
+    backgroundColor: Colors.background.secondary,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
   },
   accountCard: {
     backgroundColor: Colors.background.secondary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.card.border,
   },
   accountItem: {
     flexDirection: 'row',
@@ -572,7 +664,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.background.tertiary,
   },
   accountLabel: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'Inter-Bold',
     fontSize: FONT_SIZE.md,
     color: Colors.text.secondary,
   },
@@ -583,10 +675,18 @@ const styles = StyleSheet.create({
   },
   signOutButton: {
     backgroundColor: Colors.accent.red,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     paddingVertical: SPACING.md,
     alignItems: 'center',
-    marginTop: SPACING.md,
+    marginTop: SPACING.lg,
+    shadowColor: Colors.accent.red,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   signOutText: {
     fontFamily: 'Inter-Bold',
