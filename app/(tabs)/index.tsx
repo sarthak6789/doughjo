@@ -2,51 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import Colors from '@/constants/Colors';
 import { SPACING, FONT_SIZE, FONT_WEIGHT, BORDER_RADIUS } from '@/constants/Theme';
-import { Lock, Check, TrendingUp, PiggyBank, CreditCard, Wallet, BadgeDollarSign, ChartLine as LineChart, Brain, Trophy, Star } from 'lucide-react-native';
+import { Lock, Check, TrendingUp, PiggyBank, CreditCard, Wallet, BadgeDollarSign, ChartLine as LineChart, Trophy, Star } from 'lucide-react-native';
 import { StreakCounter } from '@/components/StreakCounter';
 import { LessonCard } from '@/components/LessonCard';
 import { SenseiDashboard } from '@/components/Sensei';
-import { QuizCard } from '@/components/QuizCard';
-
-const dailyQuizzes = [
-  {
-    id: 'quiz-1',
-    title: 'Emergency Fund Basics',
-    question: 'How many months of expenses should you save in an emergency fund?',
-    options: ['1-2 months', '3-6 months', '7-9 months', '10+ months'],
-    correctAnswer: 1,
-    reward: 20,
-    difficulty: 'Easy',
-    category: 'Saving'
-  },
-  {
-    id: 'quiz-2',
-    title: 'Credit Score Knowledge',
-    question: 'What is considered a good credit score range?',
-    options: ['300-579', '580-669', '670-739', '740-850'],
-    correctAnswer: 3,
-    reward: 25,
-    difficulty: 'Medium',
-    category: 'Credit'
-  },
-  {
-    id: 'quiz-3',
-    title: 'Budgeting Rule',
-    question: 'In the 50/30/20 rule, what percentage goes to savings?',
-    options: ['50%', '30%', '20%', '10%'],
-    correctAnswer: 2,
-    reward: 15,
-    difficulty: 'Easy',
-    category: 'Budgeting'
-  }
-];
 
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const [streakDays, setStreakDays] = useState(3);
   const [doughCoins, setDoughCoins] = useState(120);
   const [currentBelt, setCurrentBelt] = useState('yellow');
-  const [completedQuizzes, setCompletedQuizzes] = useState<string[]>([]);
   
   // Get current time in India (IST, UTC+5:30)
   const greeting = useMemo(() => {
@@ -60,13 +25,6 @@ export default function HomeScreen() {
     if (hour < 18) return 'Good afternoon!';
     return 'Good evening!';
   }, []);
-
-  const handleQuizComplete = (quizId: string, isCorrect: boolean, reward: number) => {
-    if (isCorrect && !completedQuizzes.includes(quizId)) {
-      setCompletedQuizzes(prev => [...prev, quizId]);
-      setDoughCoins(prev => prev + reward);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -101,30 +59,6 @@ export default function HomeScreen() {
               "Train daily. Master your money."
             </Text>
           </View>
-        </View>
-
-        {/* Daily Quiz Section */}
-        <View style={styles.quizSection}>
-          <View style={styles.quizHeader}>
-            <Brain color={Colors.accent.magenta} size={24} />
-            <Text style={styles.sectionTitle}>Daily Quiz Challenge</Text>
-          </View>
-          <Text style={styles.sectionSubtitle}>Test your knowledge and earn Dough Coins!</Text>
-          
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.quizScrollContainer}
-          >
-            {dailyQuizzes.map((quiz) => (
-              <QuizCard
-                key={quiz.id}
-                quiz={quiz}
-                completed={completedQuizzes.includes(quiz.id)}
-                onComplete={handleQuizComplete}
-              />
-            ))}
-          </ScrollView>
         </View>
         
         {/* Skill Tree / Dojos */}
@@ -326,19 +260,6 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     fontStyle: 'italic',
   },
-  quizSection: {
-    marginBottom: SPACING.xl,
-  },
-  quizHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.xs,
-  },
-  quizScrollContainer: {
-    paddingHorizontal: SPACING.lg,
-    paddingRight: SPACING.xl,
-  },
   skillTreeContainer: {
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.xl,
@@ -362,7 +283,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     color: Colors.text.secondary,
     marginBottom: SPACING.lg,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: 0,
   },
   achievementContainer: {
     paddingHorizontal: SPACING.lg,
