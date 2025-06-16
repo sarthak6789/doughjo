@@ -65,7 +65,7 @@ export default function HomeScreen() {
         <View style={styles.skillTreeContainer}>
           <View style={styles.skillTreeHeader}>
             <Trophy color={Colors.accent.yellow} size={24} />
-            <Text style={styles.sectionTitle}>Your Financial Dojos</Text>
+            <Text style={styles.sectionTitle}>Your Financial Dojo</Text>
           </View>
           <Text style={styles.sectionSubtitle}>Master each dojo to earn your black belt</Text>
           
