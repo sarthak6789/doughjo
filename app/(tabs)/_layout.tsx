@@ -2,7 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import Colors from '@/constants/Colors';
-import { GraduationCap, Chrome as Home, User } from 'lucide-react-native';
+import { GraduationCap, Chrome as Home, User, BookOpen } from 'lucide-react-native';
 import { SPACING, FONT_SIZE, BORDER_RADIUS } from '@/constants/Theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -37,6 +37,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="glossary"
+        options={{
+          title: 'Glossary',
+          tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
@@ -53,6 +60,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.card.border,
     paddingTop: SPACING.xs,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
   },
   tabBarLabel: {
     fontFamily: 'Inter-Medium',
