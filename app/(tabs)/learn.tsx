@@ -29,35 +29,7 @@ import Animated as ReanimatedView, {
 } from 'react-native-reanimated';
 import Colors from '@/constants/Colors';
 import { SPACING, FONT_SIZE, BORDER_RADIUS } from '@/constants/Theme';
-import { 
-  BookOpen,
-  Filter,
-  Search,
-  Star,
-  Clock,
-  TrendingUp,
-  Award,
-  ChevronRight,
-  Play,
-  Bookmark,
-  BookmarkCheck,
-  RotateCcw,
-  CheckCircle,
-  Circle,
-  Target,
-  Brain,
-  Zap,
-  Users,
-  Calendar,
-  ArrowLeft,
-  ArrowRight,
-  Heart,
-  Share2,
-  Download,
-  Settings,
-  HelpCircle,
-  X
-} from 'lucide-react-native';
+import { BookOpen, Filter, Search, Star, Clock, TrendingUp, Award, ChevronRight, Play, Bookmark, BookmarkCheck, RotateCcw, CircleCheck as CheckCircle, Circle, Target, Brain, Zap, Users, Calendar, ArrowLeft, ArrowRight, Heart, Share2, Download, Settings, CircleHelp as HelpCircle, X } from 'lucide-react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
