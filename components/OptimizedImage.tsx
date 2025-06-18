@@ -3,7 +3,7 @@ import { Image, View, StyleSheet, ActivityIndicator, TouchableOpacity, Text } fr
 import { useImageLoader } from '@/hooks/useImageLoader';
 import Colors from '@/constants/Colors';
 import { SPACING, FONT_SIZE, BORDER_RADIUS } from '@/constants/Theme';
-import { RefreshCw, AlertCircle } from 'lucide-react-native';
+import { RefreshCw, CircleAlert as AlertCircle } from 'lucide-react-native';
 
 interface OptimizedImageProps {
   source: string | null | undefined;
