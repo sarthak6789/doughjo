@@ -5,15 +5,15 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
+  Image, 
   Dimensions, 
   Animated,
   TextInput,
   Modal,
-  RefreshControl
+  FlatList
 } from 'react-native';
 import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { 
-  Animated as ReanimatedView,
+import Animated as ReanimatedView, { 
   useSharedValue, 
   useAnimatedStyle, 
   useAnimatedGestureHandler, 
@@ -30,9 +30,6 @@ import {
 import Colors from '@/constants/Colors';
 import { SPACING, FONT_SIZE, BORDER_RADIUS } from '@/constants/Theme';
 import { BookOpen, Filter, Search, Star, Clock, TrendingUp, Award, ChevronRight, Play, Bookmark, BookmarkCheck, RotateCcw, CircleCheck as CheckCircle, Circle, Target, Brain, Zap, Users, Calendar, ArrowLeft, ArrowRight, Heart, Share2, Download, Settings, CircleHelp as HelpCircle, X } from 'lucide-react-native';
-import { OptimizedImage } from '@/components/OptimizedImage';
-import { useLearningContent } from '@/hooks/useLearningContent';
-import { useImagePreloader } from '@/hooks/useImageLoader';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -101,6 +98,82 @@ const learningPaths: LearningPath[] = [
   }
 ];
 
+const learningCards: LearningCard[] = [
+  {
+    id: 'card-1',
+    title: 'Emergency Fund Essentials',
+    category: 'Saving',
+    difficulty: 'Beginner',
+    image: 'https://images.pexels.com/photos/4386431/pexels-photo-4386431.jpeg',
+    content: 'An emergency fund is your financial safety net. Start with $500, then build to 3-6 months of expenses.',
+    keyPoints: ['Start small with $500', 'Build to 3-6 months expenses', 'Keep in high-yield savings'],
+    progress: 0.3,
+    estimatedTime: 15,
+    rating: 4.8,
+    completedBy: 1250,
+    tags: ['Emergency Fund', 'Savings', 'Financial Security'],
+    nextLessons: ['card-2', 'card-4']
+  },
+  {
+    id: 'card-2',
+    title: 'Credit Score Mastery',
+    category: 'Credit',
+    difficulty: 'Beginner',
+    image: 'https://images.pexels.com/photos/4386437/pexels-photo-4386437.jpeg',
+    content: 'Your credit score affects loan rates and approval. Pay bills on time and keep credit utilization below 30%.',
+    keyPoints: ['Pay bills on time', 'Keep utilization under 30%', 'Check score regularly'],
+    progress: 0.6,
+    estimatedTime: 20,
+    rating: 4.9,
+    completedBy: 980,
+    tags: ['Credit Score', 'Credit Cards', 'Financial Health'],
+    prerequisites: ['card-1']
+  },
+  {
+    id: 'card-3',
+    title: 'Investment Fundamentals',
+    category: 'Investing',
+    difficulty: 'Intermediate',
+    image: 'https://images.pexels.com/photos/4386342/pexels-photo-4386342.jpeg',
+    content: 'Diversification reduces risk. Start with index funds for broad market exposure and low fees.',
+    keyPoints: ['Diversify your portfolio', 'Consider index funds', 'Think long-term'],
+    progress: 0.1,
+    estimatedTime: 30,
+    rating: 4.7,
+    completedBy: 750,
+    tags: ['Investing', 'Index Funds', 'Portfolio'],
+    prerequisites: ['card-1', 'card-2']
+  },
+  {
+    id: 'card-4',
+    title: 'Budgeting Made Simple',
+    category: 'Budgeting',
+    difficulty: 'Beginner',
+    image: 'https://images.pexels.com/photos/4386366/pexels-photo-4386366.jpeg',
+    content: 'The 50/30/20 rule: 50% needs, 30% wants, 20% savings. Track expenses to stay on target.',
+    keyPoints: ['50% for needs', '30% for wants', '20% for savings'],
+    progress: 0.8,
+    estimatedTime: 25,
+    rating: 4.6,
+    completedBy: 1100,
+    tags: ['Budgeting', '50/30/20 Rule', 'Money Management']
+  },
+  {
+    id: 'card-5',
+    title: 'Compound Interest Power',
+    category: 'Investing',
+    difficulty: 'Intermediate',
+    image: 'https://images.pexels.com/photos/4386405/pexels-photo-4386405.jpeg',
+    content: 'Time is your greatest asset. Starting early with small amounts beats starting late with large amounts.',
+    keyPoints: ['Start investing early', 'Consistency matters', 'Time beats timing'],
+    progress: 0.2,
+    estimatedTime: 18,
+    rating: 4.9,
+    completedBy: 890,
+    tags: ['Compound Interest', 'Long-term Investing', 'Time Value']
+  }
+];
+
 export default function LearnScreen() {
   const [currentView, setCurrentView] = useState<'overview' | 'cards' | 'paths'>('overview');
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -112,44 +185,11 @@ export default function LearnScreen() {
   const [showFilters, setShowFilters] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
   const [selectedCard, setSelectedCard] = useState<LearningCard | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
   
   const translateY = useSharedValue(0);
   const translateX = useSharedValue(0);
   const scale = useSharedValue(1);
   const scrollY = useRef(new Animated.Value(0)).current;
-
-  // Use the learning content hook
-  const { 
-    lessons, 
-    quizzes, 
-    categories, 
-    loading, 
-    error, 
-    getLessonsByCategory,
-    searchLessons,
-    refreshContent 
-  } = useLearningContent();
-
-  // Convert lessons to learning cards format
-  const learningCards: LearningCard[] = lessons.map(lesson => ({
-    id: lesson.id,
-    title: lesson.title,
-    category: lesson.category,
-    difficulty: lesson.difficulty,
-    image: lesson.cover_image_url || lesson.thumbnail_url || '',
-    content: lesson.description,
-    keyPoints: [], // You can extract this from lesson.content if structured
-    progress: Math.random(), // Replace with actual progress from user data
-    estimatedTime: lesson.estimated_time,
-    rating: 4.5 + Math.random() * 0.5, // Mock rating
-    completedBy: Math.floor(Math.random() * 1000) + 500, // Mock completion count
-    tags: [lesson.category, lesson.difficulty], // Basic tags
-  }));
-
-  // Preload images for better performance
-  const imagesToPreload = learningCards.slice(0, 10).map(card => card.image).filter(Boolean);
-  useImagePreloader(imagesToPreload);
 
   const filteredCards = learningCards.filter(card => {
     const matchesDifficulty = selectedDifficulty === 'All' || card.difficulty === selectedDifficulty;
@@ -190,12 +230,6 @@ export default function LearnScreen() {
     if (currentCardIndex > 0) {
       setCurrentCardIndex(currentCardIndex - 1);
     }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refreshContent();
-    setRefreshing(false);
   };
 
   const panGestureHandler = useAnimatedGestureHandler({
@@ -266,14 +300,6 @@ export default function LearnScreen() {
     <ScrollView 
       style={styles.overviewContainer}
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          colors={[Colors.accent.teal]}
-          tintColor={Colors.accent.teal}
-        />
-      }
       onScroll={Animated.event(
         [{ nativeEvent: { contentOffset: { y: scrollY } } }],
         { useNativeDriver: false }
@@ -288,8 +314,8 @@ export default function LearnScreen() {
           </Text>
           <View style={styles.heroStats}>
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatNumber}>{lessons.length}</Text>
-              <Text style={styles.heroStatLabel}>Lessons Available</Text>
+              <Text style={styles.heroStatNumber}>12</Text>
+              <Text style={styles.heroStatLabel}>Lessons Completed</Text>
             </View>
             <View style={styles.heroStat}>
               <Text style={styles.heroStatNumber}>4.8</Text>
@@ -480,12 +506,10 @@ export default function LearnScreen() {
         <View style={styles.cardContainer}>
           <PanGestureHandler onGestureEvent={panGestureHandler}>
             <ReanimatedView style={[styles.card, animatedCardStyle]}>
-              <OptimizedImage 
-                source={currentCard.image}
+              <Image 
+                source={{ uri: currentCard.image }} 
                 style={styles.cardImage}
-                fallbackType="lesson"
                 resizeMode="cover"
-                alt={`${currentCard.title} lesson cover`}
               />
               
               <View style={styles.cardOverlay}>
@@ -514,7 +538,7 @@ export default function LearnScreen() {
                     </View>
                     <View style={styles.metaItem}>
                       <Star color={Colors.accent.yellow} size={16} />
-                      <Text style={styles.metaText}>{currentCard.rating.toFixed(1)}</Text>
+                      <Text style={styles.metaText}>{currentCard.rating}</Text>
                     </View>
                     <View style={styles.metaItem}>
                       <Users color={Colors.text.secondary} size={16} />
@@ -527,17 +551,15 @@ export default function LearnScreen() {
                   <Text style={styles.cardTitle}>{currentCard.title}</Text>
                   <Text style={styles.cardText}>{currentCard.content}</Text>
                   
-                  {currentCard.keyPoints.length > 0 && (
-                    <View style={styles.keyPointsContainer}>
-                      <Text style={styles.keyPointsTitle}>Key Learning Points:</Text>
-                      {currentCard.keyPoints.map((point, index) => (
-                        <View key={index} style={styles.keyPoint}>
-                          <View style={styles.keyPointDot} />
-                          <Text style={styles.keyPointText}>{point}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
+                  <View style={styles.keyPointsContainer}>
+                    <Text style={styles.keyPointsTitle}>Key Learning Points:</Text>
+                    {currentCard.keyPoints.map((point, index) => (
+                      <View key={index} style={styles.keyPoint}>
+                        <View style={styles.keyPointDot} />
+                        <Text style={styles.keyPointText}>{point}</Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
               </View>
               
@@ -644,25 +666,6 @@ export default function LearnScreen() {
     </View>
   );
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading learning content...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error: {error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={refreshContent}>
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       {renderHeader()}
@@ -712,7 +715,7 @@ export default function LearnScreen() {
             <View style={styles.filterSection}>
               <Text style={styles.filterSectionTitle}>Category</Text>
               <View style={styles.filterOptions}>
-                {['All', ...categories.map(cat => cat.name)].map((category) => (
+                {['All', 'Saving', 'Credit', 'Investing', 'Budgeting'].map((category) => (
                   <TouchableOpacity
                     key={category}
                     style={[
@@ -749,42 +752,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.primary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.background.primary,
-  },
-  loadingText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: FONT_SIZE.lg,
-    color: Colors.text.secondary,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.background.primary,
-    paddingHorizontal: SPACING.lg,
-  },
-  errorText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: FONT_SIZE.lg,
-    color: Colors.accent.red,
-    textAlign: 'center',
-    marginBottom: SPACING.lg,
-  },
-  retryButton: {
-    backgroundColor: Colors.accent.teal,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-  },
-  retryButtonText: {
-    fontFamily: 'Inter-Bold',
-    fontSize: FONT_SIZE.md,
-    color: Colors.background.primary,
   },
   header: {
     paddingTop: 60,
