@@ -13,7 +13,8 @@ import {
   FlatList
 } from 'react-native';
 import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated as ReanimatedView, { 
+import { 
+  Animated as ReanimatedView,
   useSharedValue, 
   useAnimatedStyle, 
   useAnimatedGestureHandler, 
